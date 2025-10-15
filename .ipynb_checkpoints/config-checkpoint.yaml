@@ -1,0 +1,122 @@
+# YAML file for strain rate or time series estimation
+
+# used for strain rate estimation
+strain_rate:
+    # calculate strain rate if activate is True
+    activate: False
+    
+    # GPS velocity file
+    gpsvelo: 'camp_eura_2011_2017.gmtvec'
+    
+    # GPS velocity format
+    velofmt: 'GMT'
+        
+    # Grid point for estimation
+    grdmesh:
+        # calculate strain rate on grid points if activate is True
+        activate: False
+        slon: 70
+        elon: 140
+        slat: 20
+        elat: 50
+        dn  : 2
+        de  : 2
+        
+        # Output strain file
+        strainfile: 'grdmesh.txt'
+        
+        # maximum distance for searching GPS stations used for estimation
+        maxdist: 200
+        # minimum number of GPS sites used for estimation 
+        minsite: 8
+        # check azimuth
+        chkazim: True
+        # activate full inversion of strain rate by imposing Laplacian if 
+        # activate is True
+        grdsmooth:
+            activate: False
+            smoothfactor: 0.4
+    
+    usrmesh:
+        # calculate strain rate on user required points if activate is True
+        activate: True
+
+        # user required site locations. lon, lat, site
+        sitelist: ''
+        
+        # Output strain file
+        strainfile: 'usrmesh.txt'
+        
+        # maximum distance for searching GPS stations used for estimation
+        maxdist: 200
+        # minimum number of GPS sites used for estimation 
+        minsite: 8
+        # check azimuth
+        chkazim: True
+        # activate full inversion of strain rate by imposing Laplacian if 
+        # activate is True
+        grdsmooth:
+            activate: False
+            smoothfactor: 0.4
+
+
+    # use trianguar mesh if activate is True 
+    trimesh:
+        activate: True
+        
+        # Output strain file
+        strainfile: 'trimesh.txt'
+        
+        trismooth:
+            activate: False
+            smoothfactor: 0.4
+
+# used for strain timeseries estimation
+strain_timeseries:
+    # 
+    activate: True
+    
+    # lon, lat, hei, sitename
+    gpsinfo: 'cmnc.llh'
+    
+    # format of GPS time series
+    tstype: 'pos'
+    
+    # path to store GPS time series
+    tspath: '/home/zhao/cmonoc/cmnc14/pos/'
+    
+    # if gpsts = 'SAVE', reload the GPS time series and save to gps_ts.pkl
+    gpsts: 'gps_ts.pkl'
+    gpsts: 'SAVE'
+    
+    # start epoch for computation
+    sepoch: 2018.0
+    
+    # end epoch for computation
+    eepoch: 2020.0
+    
+    # end delta time, unit is day
+    deltat: 1
+    
+    grdmesh:
+        activate: False
+        slon: 110
+        elon: 130
+        slat: 30
+        elat: 50
+        nlon: 10
+        nlat: 10
+        maxdist: 300
+        minsite: 6
+        chkazim: False
+        grdsmooth: 
+            activate: False
+            smoothfactor: 0.4 
+    trimesh:
+        activate: False
+        trismooth:
+            activate: True
+            smoothfactor: 0.4   
+    usrmesh:
+        activate: True
+        sitelist: 'my_site'
