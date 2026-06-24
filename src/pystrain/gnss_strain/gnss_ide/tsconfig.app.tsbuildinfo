@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/canvasUtils.ts","./src/main.tsx","./src/mockEngine.ts","./src/types.ts","./src/vite-env.d.ts","./src/components/LogPanel.tsx","./src/components/MapViews.tsx","./src/components/ParamPanel.tsx","./src/components/StatsBar.tsx","./src/lib/utils.ts"],"version":"5.6.3"}

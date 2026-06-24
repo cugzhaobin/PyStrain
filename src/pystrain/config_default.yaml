@@ -1,0 +1,354 @@
+# ============================================================================
+# PyStrain — Default Configuration
+# ============================================================================
+# Copy this file and edit to suit your dataset, then run:
+#
+#     pystrain compute --config my_config.yaml
+#
+# or use quick subcommands (shortcuts that bypass a config file):
+#
+#     pystrain shen2015  --vel-file data.gmtvec --region 70 110 15 55 --spacing 1 1
+#     pystrain delaunay  --vel-file data.gmtvec
+#     pystrain wang2012  --vel-file data.gmtvec
+#     pystrain web
+#
+# ------------------------------ data -----------------------------------------
+data:
+
+  # Path to GNSS velocity file (GMT7/GMT8/GLOBK format, auto-detected).
+  # Required.
+  vel_file: null
+
+  # Path to polygon boundary file (lon lat pairs, one vertex per line).
+  # Optional — used to clip the mesh/triangulation.
+  poly_file: null
+
+  # Where all output files + figures are written.
+  output_dir: ./pystrain_output
+
+  # Input format.  "auto" detects from file content.
+  # Choices: "auto" | "gmt7" | "gmt8" | "globk"
+  format: auto
+
+# ---------------------------- algorithms --------------------------------------
+algorithms:
+
+  # Primary strain-rate method.
+  # Choices: "shen2015" | "delaunay" | "wang2012"
+  method: shen2015
+
+  # - - - - - - - - -  Shen et al. (2015)  - - - - - - - - - - - - - - - - - -
+  shen2015:
+
+    # Study region: [slon, elon, slat, elat] in degrees.  Required.
+    region: null
+
+    # Grid spacing: [dlon, dlat] in degrees.  Required.
+    spacing: null
+
+    # Stagger alternate rows by half spacing for smoother coverage.
+    stagger: true
+
+    # Distance-weighting kernel.  Gaussian is standard.
+    # Choices: "gaussian" | "quadratic"
+    distance_weight: gaussian
+
+    # Spatial-weighting scheme to balance azimuthal coverage.
+    # "voronoi" uses Voronoi-cell areas; null skips spatial weighting.
+    # Choices: "voronoi" | null
+    spatial_weight: voronoi
+
+    # Target total weight Wt for the optimal smoothing distance search.
+    # Larger values → smoother field, fewer edge effects.  Typical 12–30.
+    weight_threshold_Wt: 24.0
+
+    # Cutoff L0 (fraction of R): weights < L0 are set to zero.
+    distance_cutoff_L0: 0.01
+
+    # Minimum GPS sites required for a grid-point estimate.
+    min_sites: 6
+
+    # Maximum neighbour distance (km).  null → auto-search via Brent's method.
+    maxdist_km: null
+
+    # Enable optimal D search (recommended).
+    auto_search_radius: true
+
+    # Bounds for the optimal D search (km).
+    D_min_km: 1.0
+    D_max_km: 1000.0
+
+    # Fault barriers (not yet implemented; reserved).
+    fault_barriers: []
+
+  # - - - - - - - - -  Delaunay  - - - - - - - - - - - - - - - - - - - - - - -
+  delaunay:
+
+    # Minimum interior angle (°) for a triangle to be kept.
+    min_angle_deg: 10.0
+
+    # Edge-length percentile for the maximum-edge cutoff.
+    max_edge_pctl: 95.0
+
+    # Multiplier on the percentile-based cutoff.
+    max_edge_factor: 1.5
+
+    # Minimum allowed area ratio (min/max area of valid triangles).
+    min_area_ratio: 0.1
+
+    # Absolute maximum edge length (km).  null → unbounded.
+    max_edge_km: null
+
+    # Local projection for strain computation.
+    # Choices: "utm" | "polyconic"
+    projection: utm
+
+    # Remove sites that only belong to one triangle ("dangling").
+    remove_hanging_sites: true
+
+  # - - - - - - - - -  Wang (2012)  - - - - - - - - - - - - - - - - - - - - -
+  wang2012:
+
+    # Polygon file for mesh clipping (overrides data.poly_file).
+    poly_file: null
+
+    # Override the polygon-derived bounding box: [slon, elon, slat, elat].
+    # null → uses polygon bounds or GPS-data bounds.
+    mesh_region: null
+
+    # ---- Mesh generation ----
+
+    # Mesh strategy:
+    #   "adaptive" — grid-based quadtree with small random perturbation.
+    #                Fast, but may produce right-triangle shapes.
+    #   "poisson" — Poisson disk sampling.  Naturally distributed vertices,
+    #              better-shaped triangles, moderately slower.
+    #   "gmsh"    — Gmsh boundary-conforming mesh.  Best triangle quality
+    #              and boundary fidelity.  Requires: pip install gmsh
+    # Choices: "adaptive" | "poisson" | "gmsh"
+    mesh_method: adaptive
+
+    # Finest mesh spacing in degrees (≈ 30 km at mid-latitudes).
+    mesh_spacing: 0.25
+
+    # Quadtree refines cells containing > max_stations_per_cell GPS sites.
+    max_stations_per_cell: 6
+
+    # Coarsest mesh spacing in degrees.  null → mesh_spacing × 4.
+    max_spacing: null
+
+    # Perturb interior mesh nodes (grid method only).  Helps reduce
+    # right-triangle shapes when using "adaptive" mesh.
+    mesh_randomize: true
+
+    # Perturbation magnitude as a fraction of mesh_spacing (grid method only).
+    mesh_randomize_fraction: 0.2
+
+    # ---- Regularisation (Laplacian smoothing) ----
+
+    # Fixed smoothing factor (used when smooth_search = false).
+    smooth_factor: 0.01
+
+    # Enable L-curve search for the optimal smoothing factor.
+    smooth_search: true
+
+    # Log₁₀ range for the L-curve sweep.
+    smooth_range: [-2.2, -0.8]
+
+    # Log₁₀ step size for the sweep (smaller = finer search).
+    smooth_step: 0.2
+
+    # L-curve corner detection method.
+    # Choices: "lcurve" | "gcv"
+    smooth_method: lcurve
+
+    # Apply smoothing to boundary vertices.  true = fixed edge (zero Laplacian
+    # at boundary); false = free edge (less constrained).
+    smooth_boundary: true
+
+    # Minimum triangle area ratio (reserved for future quality filter).
+    min_area_ratio: 0.1
+
+# -------------------------- outlier_detection ---------------------------------
+outlier_detection:
+
+  # Enable outlier detection before strain computation.
+  enable: true
+
+  # Outlier detection algorithm:
+  #   "knn_iqr"    — KNN + MAD pre-screening, then triangulation-based
+  #                  leave-one-out IQR.  Fast, suited for dense networks.
+  #   "loo_strain" — Full leave-one-out strain estimation at each GPS site.
+  #                  Each site's velocity is predicted by the strain model
+  #                  fitted to its neighbours (self excluded).  More rigorous,
+  #                  better at detecting velocity-field inconsistencies.
+  # Choices: "knn_iqr" | "loo_strain"
+  method: knn_iqr
+
+  # - - - - - - -  knn_iqr  - - - - - - - - - - - - - - - - - - - - - - - -
+  knn_iqr:
+
+    # Number of nearest neighbours for KNN pre-screening.
+    k_neighbors: 8
+
+    # MAD threshold multiplier for the KNN stage (higher = fewer flagged).
+    mad_factor: 3.5
+
+    # Residual threshold = Q3 + iqr_factor × IQR.
+    iqr_factor: 1.5
+
+    # Absolute floor on the residual threshold (mm/yr).
+    min_residual_mm: 0.5
+
+    # Maximum outlier removal iterations.
+    max_iterations: 5
+
+    # Distance metric for KNN neighbour search.
+    # Choices: "utm" | "lonlat"
+    metric: utm
+
+    # Absolute velocity threshold (mm/yr).  null → disabled.
+    velocity_threshold_mm: null
+
+    # Include per-station details in the outlier report.
+    report_details: true
+
+  # - - - - - - -  loo_strain  - - - - - - - - - - - - - - - - - - - - - -
+  loo_strain:
+
+    # Maximum neighbour search radius (km).
+    maxdist_km: 200.0
+
+    # Minimum neighbours required for a valid strain estimate.
+    min_sites: 8
+
+    # Direct residual threshold (mm/yr).  Each station is judged
+    # independently: if |v_obs - v_pred| > min_residual_mm, it is
+    # flagged.  No population statistics (IQR) are used because the
+    # LOO residual is already a local inconsistency measure.
+    min_residual_mm: 3.0
+
+# ---------------------------- uncertainty -------------------------------------
+# Monte Carlo uncertainty propagation: perturb input velocities according
+# to their formal uncertainties, re-run the strain estimator N times, and
+# compute standard deviations of all strain-rate components.
+uncertainty:
+
+  # Master toggle.  When false, uncertainty analysis is skipped entirely.
+  enable: false
+
+  # Number of Monte Carlo iterations (higher = more stable std estimates
+  # but linearly more expensive).  200 is a good starting point.
+  mc_iterations: 200
+
+  # Random seed for reproducible perturbations.
+  seed: 42
+
+# --------------------------- visualization ------------------------------------
+visualization:
+
+  # Figure resolution (dots per inch).
+  dpi: 150
+
+  # Toggle all figure output on/off.
+  save_figures: true
+
+  # Subdirectory for PNG figures within output_dir.
+  figure_dir: figures
+
+  # Individual figure toggles:
+  show_raw_velocity: true        # 01_raw_velocity.png
+  show_outliers: true            # 02_outliers.png
+  show_clean_velocity: true      # 03_clean_velocity.png
+  show_triangulation: true       # 04_triangulation.png  (delaunay / wang2012)
+  show_grid_points: true         # 04_grid_points.png    (shen2015)
+  show_search_radius: true       # 05_search_radius.png  (shen2015)
+  show_strain_scalars: true      # 06_dilatation.png + 07_max_shear.png
+  show_wang2012_mesh: true       # 05_wang2012_mesh.png  (wang2012)
+  show_principal_crosses: true   # 08_principal_strain.png
+
+# ----------------------------- timeseries ---------------------------------------
+# Strain TIME SERIES from GPS position time series (not velocity fields).
+# Use this section when you have daily .pos or .dat position files and want
+# to compute strain at every epoch, producing strain-vs-time output.
+#
+# Run with:  pystrain2 timeseries --config my_ts_config.yaml
+timeseries:
+
+  # Estimation method (like algorithms.method for strain-rate mode).
+  #   "grid" — regular grid points, every epoch
+  #   "tri"  — Delaunay triangle centroids, every epoch
+  #   "user" — user-defined site-group centroids, every epoch
+  # Choices: "grid" | "tri" | "user"
+  method: grid
+
+  # GPS station metadata file: columns = lon lat height site_name
+  gps_info_file: null
+
+  # Time-series format:
+  #   "pos" — PBO-format .pos files (daily positions, fixed-width 24 cols)
+  #   "dat" — PyTsfit .dat files (7 cols: decyr N E U SN SE SU, mm)
+  ts_type: pos
+
+  # Directory containing the per-site time-series files.
+  ts_path: null
+
+  # Start / end epochs (decimal years, e.g. 2020.0 — 2021.0).
+  sepoch: null
+  eepoch: null
+
+  # Output directory for strain time-series files.
+  output_dir: ./pystrain2_output
+
+  # - - - - - - -  Grid (method=grid)  - - - - - - - - - - - - - - - - - - -
+  grid:
+    # Grid extent: [slon, elon, slat, elat] in degrees.
+    slon: null
+    elon: null
+    slat: null
+    elat: null
+
+    # Grid spacing in degrees.
+    dn: null
+    de: null
+
+    # Stagger alternate rows by half spacing.
+    stagger: true
+
+    # Maximum distance (km) from grid point to GPS sites.
+    maxdist_km: 300.0
+
+    # Minimum GPS sites required for a valid estimate.
+    min_sites: 6
+
+    # Require sites in all four quadrants around the grid point.
+    check_azimuth: true
+
+  # - - - - - -  Triangle (method=tri)  - - - - - - - - - - - - - - - - - -
+  tri:
+    # Minimum triangle interior angle (°).
+    min_angle_deg: 10.0
+
+    # Edge-length percentile for max-edge cutoff.
+    max_edge_pctl: 95.0
+
+    # Multiplier on percentile-based cutoff.
+    max_edge_factor: 1.5
+
+    # Minimum area ratio (relative to 5th percentile).
+    min_area_ratio: 0.1
+
+    # Absolute edge-length cap (km).  null → unbounded.
+    max_edge_km: null
+
+    # Local projection: "utm" | "polyconic".
+    projection: utm
+
+  # - - - - - -  User groups (method=user)  - - - - - - - - - - - - - - - -
+  user:
+    # Path to a site-groups file (one group per line, space-separated names).
+    site_groups_file: null
+
+    # Maximum allowed per-site uncertainty (mm).  Epochs with any site
+    # exceeding this are skipped.
+    max_sigma_mm: 5.0

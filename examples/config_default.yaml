@@ -1,0 +1,156 @@
+# ============================================================================
+# PyStrain2 — Example Configuration (Tibetan Plateau dataset)
+# ============================================================================
+# Copy and edit to match your study area and data.
+#
+# Quick start with built-in defaults:
+#     pystrain2 wang2012  --vel-file my_data.gmtvec --output-dir ./results
+#
+# Run with this config file:
+#     pystrain2 compute --config examples/config_default.yaml
+# ============================================================================
+
+data:
+  vel_file: wangmin_velo.gmtvec
+  poly_file: poly.dat          # optional boundary polygon
+  output_dir: ./pystrain2_output
+  format: auto                  # "auto" | "gmt7" | "gmt8" | "globk"
+
+# ---------------------------------------------------------------------------
+algorithms:
+  # Primary method: "shen2015" | "delaunay" | "wang2012"
+  method: wang2012
+
+  # - - - - - - - -  Shen et al. (2015) grid method - - - - - - - - - - - -
+  shen2015:
+    region: 70 110 15 55        # [slon, elon, slat, elat]  (required)
+    spacing: 1 1                # [dlon, dlat] grid spacing in °
+    stagger: true
+    distance_weight: gaussian   # "gaussian" | "quadratic"
+    spatial_weight: voronoi     # "voronoi" | null
+    weight_threshold_Wt: 20     # target total weight (12–30 typical)
+    distance_cutoff_L0: 0.01
+    min_sites: 6
+    maxdist_km: null            # null → auto-search
+    auto_search_radius: true
+    D_min_km: 1.0
+    D_max_km: 1000.0
+    fault_barriers: []
+
+  # - - - - - - - -  Delaunay triangulation method - - - - - - - - - - - -
+  delaunay:
+    min_angle_deg: 30.0         # minimum triangle interior angle
+    max_edge_pctl: 95.0
+    max_edge_factor: 1.5
+    min_area_ratio: 0.1
+    max_edge_km: null
+    projection: utm             # "utm" | "polyconic"
+    remove_hanging_sites: true
+
+  # - - - - - - - -  Wang (2012) mesh method - - - - - - - - - - - - - - -
+  wang2012:
+    # ---- domain ----
+    poly_file: poly.dat         # clip mesh to this polygon
+    mesh_region: null           # [slon, elon, slat, elat] override
+    mesh_outline_file: null
+
+    # ---- mesh strategy ----
+    mesh_method: gmsh            # "adaptive" (grid+perturb, fast)
+                                # "poisson"  (Poisson-disk, natural triangles)
+                                # "gmsh"     (Gmsh boundary-conforming, best quality)
+    mesh_spacing: 0.2           # finest spacing in °  (~22 km at mid-lat)
+    max_stations_per_cell: 3    # subdivide cells with > this many sites
+    max_spacing: 2.0            # coarsest spacing  (null → mesh_spacing × 4)
+    mesh_randomize: true        # perturb interior nodes (adaptive only)
+    mesh_randomize_fraction: 0.2
+
+    # ---- Laplacian smoothing / regularisation ----
+    smooth_factor: 0.01         # fixed factor when smooth_search=false
+    smooth_search: true         # L-curve search for optimal factor
+    smooth_range: [-2.2, -0.8]  # log10 range
+    smooth_step: 0.2            # log10 step
+    smooth_method: lcurve       # "lcurve" | "gcv"
+    smooth_boundary: true       # smooth boundary nodes
+
+    min_area_ratio: 0.1         # reserved
+
+# -------------------------- outlier_detection ---------------------------------
+outlier_detection:
+
+  # Enable outlier detection before strain computation.
+  enable: False
+
+  # Outlier detection algorithm:
+  #   "knn_iqr"    — KNN + MAD pre-screening, then triangulation-based
+  #                  leave-one-out IQR.  Fast, suited for dense networks.
+  #   "loo_strain" — Full leave-one-out strain estimation at each GPS site.
+  #                  Each site's velocity is predicted by the strain model
+  #                  fitted to its neighbours (self excluded).  More rigorous,
+  #                  better at detecting velocity-field inconsistencies.
+  # Choices: "knn_iqr" | "loo_strain"
+  method: loo_strain
+
+  # - - - - - - -  knn_iqr  - - - - - - - - - - - - - - - - - - - - - - - -
+  knn_iqr:
+
+    # Number of nearest neighbours for KNN pre-screening.
+    k_neighbors: 8
+
+    # MAD threshold multiplier for the KNN stage (higher = fewer flagged).
+    mad_factor: 3.5
+
+    # Residual threshold = Q3 + iqr_factor × IQR.
+    iqr_factor: 1.5
+
+    # Absolute floor on the residual threshold (mm/yr).
+    min_residual_mm: 0.5
+
+    # Maximum outlier removal iterations.
+    max_iterations: 5
+
+    # Distance metric for KNN neighbour search.
+    # Choices: "utm" | "lonlat"
+    metric: utm
+
+    # Absolute velocity threshold (mm/yr).  null → disabled.
+    velocity_threshold_mm: null
+
+    # Include per-station details in the outlier report.
+    report_details: true
+
+  # - - - - - - -  loo_strain  - - - - - - - - - - - - - - - - - - - - - -
+  loo_strain:
+
+    # Maximum neighbour search radius (km).
+    maxdist_km: 200.0
+
+    # Minimum neighbours required for a valid strain estimate.
+    min_sites: 8
+
+    # Direct residual threshold (mm/yr).  No IQR — each station is judged
+    # independently: |v_obs - v_pred| > min_residual_mm → outlier.
+    min_residual_mm: 3.5
+
+# ---------------------------------------------------------------------------
+# Monte Carlo strain-rate uncertainty propagation.
+uncertainty:
+  enable: false                 # master toggle
+  mc_iterations: 200            # 100–300 for grid/Delaunay, 30–80 for Wang2012
+  seed: 42
+
+# ---------------------------------------------------------------------------
+visualization:
+  dpi: 150
+  save_figures: true
+  figure_dir: figures
+
+  # Toggle individual figures:
+  show_raw_velocity: true
+  show_outliers: true
+  show_clean_velocity: true
+  show_triangulation: true       # (delaunay / wang2012)
+  show_grid_points: true         # (shen2015)
+  show_search_radius: true       # (shen2015)
+  show_strain_scalars: true
+  show_wang2012_mesh: true       # (wang2012)
+  show_principal_crosses: true

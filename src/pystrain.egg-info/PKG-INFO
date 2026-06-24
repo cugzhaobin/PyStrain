@@ -1,18 +1,62 @@
 Metadata-Version: 2.4
 Name: pystrain
-Version: 0.1.0
-Summary: a python program used for computing strain rate and strain time series from GPS data.
-Author-email: Bin Zhao <zhaobin@cgps.ac.cn>
-Maintainer-email: Bin Zhao <zhaobin@cgps.ac.cn>
+Version: 1.1.0
+Summary: Python package for GNSS strain-rate and strain-time-series estimation
+Author: PyStrain Contributors
 License: MIT
+Project-URL: Homepage, https://github.com/.../PyStrain
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
-Requires-Dist: numpy
-Requires-Dist: scipy
-Requires-Dist: matplotlib
-Requires-Dist: pyproj
-Requires-Dist: h5py
-Requires-Dist: logging
-Requires-Dist: sklearn
+Requires-Dist: numpy>=1.21
+Requires-Dist: scipy>=1.4
+Requires-Dist: matplotlib>=3.4
+Requires-Dist: pyproj>=3.0
+Requires-Dist: pyyaml>=5.4
+Requires-Dist: scikit-learn>=1.0
+Provides-Extra: gui
+Requires-Dist: streamlit>=1.20; extra == "gui"
+Requires-Dist: pandas>=1.3; extra == "gui"
+Requires-Dist: plotly>=5.0; extra == "gui"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: pyflakes; extra == "dev"
 
-# PyStrain
+# PyStrain2
+
+A refactored Python package for estimating GNSS crustal strain rates and strain time series.
+
+## Features
+
+- **Grid-based strain rate**: Shen et al. (2015) BSSA optimal interpolation with distance and spatial-coverage weighting.
+- **Triangulation strain rate**: Delaunay-based least-squares strain estimation.
+- **Velmap-style strain rate**: Linear triangular finite-element shape functions.
+- **User-defined points**: Strain rate at arbitrary lon/lat points.
+- **Outlier detection**: KNN pre-screening + iterative residual IQR removal.
+- **Uncertainty**: Analytic covariance and Monte Carlo propagation.
+
+## Installation
+
+```bash
+cd /simulation/geodesy/PyStrain2
+pip install -e .
+```
+
+## Quick start
+
+```bash
+pystrain2 grid --vel-file data.gmtvec --region 70 140 20 50 --spacing 2 2 --output-dir out
+```
+
+## Input format
+
+GMT 8-column velocity file:
+```
+lon lat Ve Vn Se Sn Rho SiteName
+```
+
+## License
+
+MIT

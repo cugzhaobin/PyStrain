@@ -1,0 +1,57 @@
+# ============================================================================
+# PyStrain2 — Strain Time Series Configuration Example
+# ============================================================================
+# Run:  pystrain2 timeseries --config examples/config_timeseries.yaml
+#
+# Three methods are available (choose one via the "method" field):
+#   grid — strain at each grid point, every epoch
+#   tri  — strain at each Delaunay triangle centroid, every epoch
+#   user — strain at user-defined site-group centroids, every epoch
+
+timeseries:
+  # ---- Method: "grid" | "tri" | "user" ----
+  method: user
+
+  # ---- GPS station info ----
+  # File format: lon  lat  height  site_name
+  gps_info_file: /home/zhao/cmonoc/strain/timeseries/cmnc.llh
+
+  # Time-series type: "pos" (PBO format) or "dat" (PyTsfit format)
+  ts_type: dat
+
+  # Directory containing .pos or .dat files (one per station)
+  ts_path: /home/zhao/cmonoc/cmnc14/pytsfit
+
+  # Time window in decimal years
+  sepoch: 2020.0
+  eepoch: 2021.0
+
+  output_dir: ./pystrain2_output
+
+  # ------- Grid mode (used when method=grid) -------
+  grid:
+    slon: 70.0
+    elon: 110.0
+    slat: 15.0
+    elat: 55.0
+    dn: 0.5       # grid spacing in longitude (degrees)
+    de: 0.5       # grid spacing in latitude (degrees)
+    stagger: true
+    maxdist_km: 300.0
+    min_sites: 6
+    check_azimuth: true
+
+  # ------- Triangle mode (used when method=tri) -------
+  tri:
+    min_angle_deg: 10.0
+    max_edge_pctl: 95.0
+    max_edge_factor: 1.5
+    min_area_ratio: 0.1
+    max_edge_km: null
+    projection: utm
+
+  # ------- User mode (used when method=user) -------
+  user:
+    # File with one group per line: site1 site2 site3 ...
+    site_groups_file: /home/zhao/cmonoc/strain/timeseries/poly_list2
+    max_sigma_mm: 5.0

@@ -1,30 +1,45 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pystrain"
-version = "0.1.0"
-description = "a python program used for computing strain rate and strain time series from GPS data."
+version = "1.1.0"
+description = "Python package for GNSS strain-rate and strain-time-series estimation"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "MIT" }
 authors = [
-    { name = "Bin Zhao", email = "zhaobin@cgps.ac.cn" }
-]
-maintainers = [
-    { name = "Bin Zhao", email = "zhaobin@cgps.ac.cn" }
+    { name = "PyStrain Contributors" }
 ]
 requires-python = ">=3.7"
 dependencies = [
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "pyproj",
-    "h5py",
-    "logging",
-    "sklearn"
+    "numpy>=1.21",
+    "scipy>=1.4",
+    "matplotlib>=3.4",
+    "pyproj>=3.0",
+    "pyyaml>=5.4",
+    "scikit-learn>=1.0",
 ]
 
+[project.optional-dependencies]
+gui = ["streamlit>=1.20", "pandas>=1.3", "plotly>=5.0"]
+dev = ["pytest>=7.0", "pytest-cov", "black", "ruff", "pyflakes"]
+
 [project.scripts]
-"do_pystrain.py" = "pystrain.scripts.do_pystrain:main"
-"plot_strain_ts.py" = "pystrain.scripts.plot_strain_ts:main"
+pystrain = "pystrain.cli.main:main"
+
+[project.urls]
+Homepage = "https://github.com/.../PyStrain"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pystrain = ["config_default.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning:pyproj.*",
+    "ignore::UserWarning:matplotlib.*",
+]
