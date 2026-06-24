@@ -11,7 +11,6 @@
 | **Shen et al. (2015)** | Grid-based optimal interpolation with distance weighting (Gaussian / quadratic) and spatial-coverage weighting (azimuthal or Voronoi-cell area). Automatically searches for the optimal smoothing distance *D* via Brent's method. | Shen et al., *BSSA*, 2015 |
 | **Delaunay Triangulation** | Quality-filtered Delaunay triangulation with weighted least-squares strain estimation at each triangle centroid. Supports minimum angle, maximum edge length, and area-ratio quality controls. | — |
 | **Wang (2012)** | Finite-element mesh (adaptive grid, Poisson-disk, or Gmsh-based) with Laplacian smoothing regularization and L-curve optimal smoothing selection. | Wang et al., 2012; England & Molnar, 2005 |
-| **Velmap-style** | Linear triangular shape functions (finite-element style, no explicit regularization). | — |
 | **User-defined points** | Estimate strain rate at arbitrary user-specified longitude/latitude locations. | — |
 
 ### Additional Capabilities
