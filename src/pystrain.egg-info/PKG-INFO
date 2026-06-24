@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: pystrain
+Version: 0.1.0
+Summary: a python program used for computing strain rate and strain time series from GPS data.
+Author-email: Bin Zhao <zhaobin@cgps.ac.cn>
+Maintainer-email: Bin Zhao <zhaobin@cgps.ac.cn>
+License: MIT
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+Requires-Dist: pyproj
+Requires-Dist: h5py
+Requires-Dist: logging
+Requires-Dist: sklearn
+
+# PyStrain

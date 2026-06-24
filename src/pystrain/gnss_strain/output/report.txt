@@ -1,0 +1,10 @@
+# GNSS Strain Rate Calculation Report
+Number of input sites:      2064
+Number of sites removed:    765
+Number of sites used:       1299
+Number of triangles:        2339
+Smoothing weight:           0.3
+Monte Carlo iterations:     200
+Alpha-shape radius:         N/A
+Min triangle angle (deg):   10.0
+Max edge length percentile: 95.0

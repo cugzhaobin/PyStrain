@@ -1,0 +1,3 @@
+[console_scripts]
+do_pystrain.py = pystrain.scripts.do_pystrain:main
+plot_strain_ts.py = pystrain.scripts.plot_strain_ts:main

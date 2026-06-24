@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── IDE Chrome ─────────────────────────────── */
+    --ide-bg:       222 24% 9%;      /* deep slate */
+    --ide-surface:  222 22% 12%;     /* card / panel */
+    --ide-elevated: 222 20% 16%;     /* input, hover */
+    --ide-border:   222 18% 22%;     /* dividers */
+    --ide-sidebar:  222 26% 10%;     /* left panel */
+
+    /* ── Typography ─────────────────────────────── */
+    --foreground:   210 30% 88%;     /* primary text */
+    --muted:        215 16% 48%;     /* secondary text */
+
+    /* ── Brand / Accent ─────────────────────────── */
+    --accent:       199 90% 58%;     /* cyan-blue */
+    --accent-2:     258 80% 68%;     /* purple (secondary) */
+    --tab:          199 90% 58%;
+
+    /* ── Status ─────────────────────────────────── */
+    --danger:       0   78% 60%;
+    --success:      145 65% 50%;
+    --warning:      38  90% 58%;
+
+    /* ── Map colormaps (CSS vars for canvas) ─────── */
+    --map-cold:     #2563eb;
+    --map-neutral:  #1e293b;
+    --map-hot:      #dc2626;
+    --map-shear:    #ea580c;
+
+    /* ── Gradients ───────────────────────────────── */
+    --gradient-accent: linear-gradient(135deg, hsl(199 90% 58%), hsl(258 80% 68%));
+    --gradient-panel:  linear-gradient(180deg, hsl(222 24% 9%) 0%, hsl(222 22% 11%) 100%);
+    --gradient-danger: linear-gradient(135deg, hsl(0 78% 60%), hsl(20 90% 55%));
+
+    /* ── Shadows ─────────────────────────────────── */
+    --shadow-panel: 0 0 0 1px hsl(222 18% 22%);
+    --shadow-glow:  0 0 24px hsl(199 90% 58% / 0.2);
+  }
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: hsl(var(--ide-bg));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--ide-border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted)); }
+}
+
+@layer utilities {
+  .gradient-accent { background: var(--gradient-accent); }
+  .gradient-panel  { background: var(--gradient-panel); }
+  .text-gradient-accent {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Shimmer skeleton */
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--ide-surface)) 0%,
+      hsl(var(--ide-elevated)) 50%,
+      hsl(var(--ide-surface)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* IDE section label */
+  .section-label {
+    @apply text-2xs font-semibold uppercase tracking-widest;
+    color: hsl(var(--muted));
+  }
+
+  /* Slider reset */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    background: hsl(var(--ide-elevated));
+    height: 4px;
+    border-radius: 2px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: hsl(var(--accent));
+    margin-top: -5px;
+    box-shadow: 0 0 6px hsl(var(--accent) / 0.5);
+    transition: box-shadow 0.2s;
+  }
+  input[type="range"]:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 12px hsl(var(--accent) / 0.8);
+  }
+
+  /* Number input */
+  input[type="number"] {
+    background: hsl(var(--ide-elevated));
+    border: 1px solid hsl(var(--ide-border));
+    color: hsl(var(--foreground));
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    width: 80px;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 2px hsl(var(--accent) / 0.15);
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  /* Select */
+  select {
+    background: hsl(var(--ide-elevated));
+    border: 1px solid hsl(var(--ide-border));
+    color: hsl(var(--foreground));
+    border-radius: 5px;
+    padding: 3px 22px 3px 8px;
+    font-size: 12px;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  select:focus {
+    outline: none;
+    border-color: hsl(var(--accent));
+  }
+
+  /* Checkbox */
+  input[type="checkbox"] {
+    accent-color: hsl(var(--accent));
+    width: 13px; height: 13px;
+    cursor: pointer;
+  }
+}
